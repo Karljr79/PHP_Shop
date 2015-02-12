@@ -10,5 +10,5 @@
 vendor
 
 ### Composer Files ###
-.lock
-.phar
+composer.lock
+composer.phar
