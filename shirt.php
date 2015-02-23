@@ -47,7 +47,9 @@ include("inc/header.php"); ?>
 							 });
 						  </script>
 						  
-						  <form id="checkout" method="post" action="bt-payment.php">
+					<h1><span class="price">PayPal Only</h1>
+					
+						<form id="checkout" method="post" action="bt-payment.php">
 						  <p><div id="paypal-button"></div></p>
 						  <p><input type="submit" value="Pay"></p>
 						</form>
@@ -56,9 +58,36 @@ include("inc/header.php"); ?>
 						  braintree.setup(
 							'<?php echo $btClientToken; ?>', 
 							'paypal', {
-							  container: 'paypal-button'
-							 });
+							  container: 'paypal-button',
+							  enableShippingAddress: true,
+							  onSuccess: function (email, nonce, shippingAddress) {
+							      document.forms["checkout"].elements["shippingName"].value = shippingAddress.recipient_name;
+							      document.forms["checkout"].elements["streetAddress"].value = shippingAddress.street_address;
+							      document.forms["checkout"].elements["postalCode"].value = shippingAddress.postal_code;
+							      document.forms["checkout"].elements["countryCode"].value = shippingAddress.country_code_alpha_2;
+                                }
+							 }
+							 );
 						  </script>
+						  
+						  <h1><span class="price">Custom</h1>
+					
+							<form id="checkout" action="bt-payment.php" method="post">
+	                          <input data-braintree-name="number" value="4111111111111111">
+	                          <input data-braintree-name="expiration_date" value="10/20">
+	                          <input data-braintree-name="cvv" value="100">
+	                          <input data-braintree-name="postal_code" value="94107">
+	                          <input type="submit" id="submit" value="Pay">
+	                        </form>
+							<script src='https://js.braintreegateway.com/v2/braintree.js'></script>
+							<script type="text/javascript">
+							  braintree.setup(
+								'<?php echo $btClientToken; ?>', 
+								'custom', {
+								  id: 'checkout'
+								 });
+							  </script>
+						  
 					<p class="note-designer">* All shirts are designed by Karl.</p>
 				</div>
 				
