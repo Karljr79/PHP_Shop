@@ -29,6 +29,8 @@ include("inc/client-token.php");
 				  echo '<h2>Transaction Details</h2>';
           echo '<p>For your order ID <code>' . $orderId . '</code>, ' . 
                'the Braintree Sandbox transaction ID is <code>' . $txn->id . '</code>.</p>';
+          echo '<p>PayPal Debug ID: <code>' . $txn->paypalDetails->debugId . "</code></p>";
+          //echo '<p>The DEBUG ID is: <code>' . $txn->params . '</code>.</p>';
           echo '</div>';
           echo '</div>';
           
