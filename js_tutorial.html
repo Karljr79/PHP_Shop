@@ -1,0 +1,552 @@
+<html><body><pre><script>
+    function log(arg) {
+        document.writeln(arg);
+    }
+    
+    function divider() {
+        log("==========================================");
+    }
+    
+    function identity(x) {
+        return x;
+    }
+    log("Identity function returns: " + identity(3));
+    
+    divider();
+    
+    //binary function to add two params
+    function add(x, y) {
+        var result = x + y;
+        return result;
+    }
+    log("Add function returns: " + add(3, 4));
+    
+    divider();
+    
+    //binary function to subtract two params
+    function sub(x, y) {
+        var result = x - y;
+        return result;
+    }
+    log("Subtract function returns: " + sub(3, 4));
+    
+    divider();
+    
+    //binary function to multiply two params
+    function mul(x, y) {
+        var result = x * y;
+        return result;
+    }
+    log("Multiply function returns: " + mul(3, 4));
+    
+    divider();
+    
+    //function which returns a function returing the orig. param
+    function identityf(x) {
+        return function() {
+          return x;
+        };
+    }
+    var three = identityf(3);
+    log("identity f function returns: " + three());
+    
+    divider();
+    
+    //returns a function which adds first and second
+    function addf(x) {
+        return function(y) {
+            return add(x, y);
+        };
+    }
+    log("add f function returns: " + addf(3)(4));
+    
+    divider();
+    
+    // write a function liftf that takes a binary function, and makes it callable with two invocations
+    function liftf(binary) {
+        return function (first) {
+            return function (second) {
+                return binary(first, second);
+            };
+        };
+    }
+    log("lift f function returns: " + liftf(mul)(3)(4));
+    
+    divider();
+    
+    //this is a process called "currying."
+    // write a function curry that takes a binary function and an argument and returna a function tha can take a second argument
+    function curry(binary, x) {
+        return function (y) {
+            return binary(x, y);
+        };
+    }
+    var add3 = curry(add, 3);
+    log("curry function returns: " + add3(4));
+    log("curry(mul, 5)(6) returns: " + curry(mul, 5)(6));
+    
+    divider();
+    
+    //without writing a new function, find three ways of making a function
+    //called "inc" which adds one to whatever argument you pass.
+    var inc = curry(add, 1);
+    var inc2 = addf(1);
+    var inc3 = liftf(add)(1);
+    log("1st inc function, using curry(add, 1): " + inc(5));
+    log("2nd inc function, using addf(1): " + inc2(5));
+    log("3rd inc function, using liftf(add)(1): " + inc3(5));
+    
+    divider();
+    
+    //write a function "twice" that takes a binary function and returns
+    //a unary function that passes its argument to the binary function twice
+    function twice(binary) {
+        return function (y) {
+            return binary(y, y);
+        };
+    }
+    var doubl = twice(add);
+    var square = twice(mul);
+    log("twice function passing 'add' returns: " + doubl(11));
+    log("twice function passing 'mul' returns: " + square(11));
+    
+    divider();
+    
+    //write reverse, a function that reverses the arguments of a binary function
+    function reverse(binary) {
+        return function(first, second) {
+            return  binary(second, first);  
+        };
+    }
+    var bus = reverse(sub);
+    log("reverse function passing 'sub' returns: " + bus(3, 2));
+    
+    divider();
+    
+    //write a function composeu that takes two unary functions and returns a unary function
+    //that calls them both
+    function composeu(unary1, unary2) {
+        return function (a) {
+            return unary2(unary1(a));
+        };
+    }
+    log("composeu function composeu(doubl, square)(5) returns: " + composeu(doubl, square)(5));
+    
+    divider();
+    
+    //write a function composeb that takes two binary function and returns a function 
+    //that calls them both
+    function composeb(binary1, binary2) {
+        return function(x, y, z) {
+             return binary2(binary1(x, y), z);
+        };
+    }
+    log("composeb function composeb(add, mul)(2, 3, 7) returns: " + composeb(add, mul)(2, 3, 7));
+    
+    divider();
+    
+    //write a once function that allows a binary function to be called only once
+    //var add_once = once(add)
+    //add_once(3, 4) = 7
+    //add_once(3, 5) = undefined
+    function once(binary) {
+        var bOnce = true;
+        return function (a, b) {
+          if (bOnce) {
+              bOnce = false;
+              return binary(a, b);
+          }
+          return undefined; //you don't really need this but its a good idea
+        };
+    }
+    var add_once = once(add);
+    log("add_once using add_once(3, 4) returns: " + add_once(3, 4));
+    log("add_once using add_once(3, 4) again returns: " + add_once(3, 4));
+    
+    divider();
+    
+    //Write a fromTo function that produces a generator that will produce values in 
+    //a range
+    //var index = fromTo(0, 3);
+    //index() -> 0
+    //index() -> 1
+    //index() -> 2
+    //index() -> undefined
+    function fromTo(from, to) {
+        return function () {
+            var value = from;
+            if (value < to) {
+                from += 1;
+                return value;
+            }
+            return undefined;
+        };
+    }
+    var index = fromTo(0, 3);
+    log("index() 1st call: " + index());
+    log("index() 2nd call: " + index());
+    log("index() 3rd call: " + index());
+    log("index() 4th call: " + index());
+    
+    divider();
+    
+    //write an element function that takes an array and a generator and returns a generator 
+    //that will produc elements from the array
+    //var ele = element(['a', 'b', 'c', 'd'], fromTo(1,3));
+    //ele() -> 'b'
+    //ele() -> 'c'
+    //ele() -> undefined
+    function element(array, generator) {
+        return function () {
+            var index = generator();
+            if (index !== undefined) {
+                return array[index];
+            }
+        };
+    }
+    var ele = element(['a', 'b', 'c', 'd'], fromTo(1,3));
+    log("ele() 1st call: " + ele());
+    log("ele() 2nt call: " + ele());
+    log("ele() 3rd call: " + ele());
+    
+    divider();
+    
+    //modify the element function so that the generator arguement is optional.
+    //If a generator is not provided, then each of the elements will be produced
+    //ele() -> 'a'
+    //ele() -> 'b'
+    //ele() -> 'c'
+    //ele() -> 'd'
+    //ele() -> undefined
+    function element2(array, generator) {
+        if (generator === undefined) {
+            generator = fromTo(0, array.length);
+        }
+        return function () {
+            var index = generator();
+            if (index !== undefined) {
+                return array[index];
+            }
+        };
+    }
+    var ele2 = element2(['a', 'b', 'c', 'd']);
+    log("ele2() 1st call: " + ele2());
+    log("ele2() 2nt call: " + ele2());
+    log("ele2() 3rd call: " + ele2());
+    log("ele2() 4rd call: " + ele2());
+    
+    divider();
+    
+    //write a collect function that takes a generator and an array and produces
+    //a function that will collect the results in an array
+    //var array[];
+    //var col = collect(fromTo(0, 2), array);
+    //col() -> 0
+    //col() -> 1
+    //col() -> undefined
+    //array -> [0, 1]
+    function collect(generator, array) {
+        return function () {
+            var index = generator();
+            if (index !== undefined) {
+                array.push(index);
+            }
+            return index;
+        };
+    }
+    var array = [];
+    var col = collect(fromTo(0, 2), array);
+    log("col() 1st call: " + col());
+    log("col() 2nt call: " + col());
+    log("col() 3rd call: " + col());
+    log("The Array : " + array);
+    
+    divider();
+    
+    //write a filter function that takes a generator and a predicate and produces a 
+    //generator that produces only th values approved by the predicate
+    //var fil = filter(fromTo(0, 5), 
+    //    function third(value) {
+    //        return (value % 3) === 0;
+    //    }
+    //fil() -> 0
+    //fil() -> 3
+    //fil() -> undefined
+    function filter(generator, pred) {
+        return function recur() {
+          var value = generator();
+          if (value === undefined || pred(value)) {
+              return value;
+          }
+          return recur();
+        };
+    }
+    var fil = filter(fromTo(0, 5), 
+        function third(value) {
+            return (value % 3) === 0;
+        });
+    log("fil() 1st call: " + fil());
+    log("fil() 2nd call: " + fil());
+    log("fil() 3rt call: " + fil());
+    
+    divider();
+    
+    //write a concat function that takes two generators and produces a generator
+    //that combines the sequences
+    //var con = concat(fromTo(0, 3), fromTo(0,2));
+    //con -> 0
+    //con -> 1
+    //con -> 2
+    //con -> 0
+    //con -> 1
+    //con -> undefined
+    function concat(gen1, gen2) {
+        return function () {
+            var value;
+            if (gen1 !== undefined) {
+                value = gen1();
+                if (value !== undefined) {
+                    return value;
+                }
+                gen1 = undefined;
+            }
+            return gen2();
+        };
+    }
+    var con = concat(fromTo(0, 3), fromTo(0, 2));
+    log("con() 1st call: " + con());
+    log("con() 2nd call: " + con());
+    log("con() 3rd call: " + con());
+    log("con() 4th call: " + con());
+    log("con() 5th call: " + con());
+    log("con() 6th call: " + con());
+    
+    divider();
+    
+    //Make a function gensymf that makes a function that generates unique symbols
+    //var geng = gensymf("G");
+    //var genh = gensymf("H");
+    //geng() -> G1
+    //genh() -> H1
+    //geng() -> G2
+    //genh() -> H2
+    function gensymf(symbol) {
+        var count = 0;
+        return function () {
+            count += 1;
+            return symbol + count;
+        };
+    }
+    var geng = gensymf("G");
+    var genh = gensymf("H");
+    log("gensymf");
+    log("geng() 1st call returns: " + geng());
+    log("geng() 2nd call returns: " + geng());
+    log("geng() 3rd call returns: " + geng());
+    log("genh() 1st call returns: " + genh());
+    log("genh() 2nd call returns: " + genh());
+    
+    divider();
+    
+    //write a function gensymff that takes a unary function and a seed and returns a gensymf
+    //var gensymf = gensymff(inc, 0);
+    //var geng = gensymf("G");
+    //var genh = gensymf("H");
+    //geng() -> G1
+    //genh() -> H1
+    //geng() -> G2
+    //genh() -> H2
+    function gensymff(unary, seed) {
+        return function (prefix) {
+            var number = seed;
+            return function () {
+              number = unary(number);
+              return prefix + number;
+            };
+        };
+    }
+    var gensymf2 = gensymff(inc, 1);
+    var geng = gensymf2("G");
+    var genh = gensymf2("H");
+    log("gensymff");
+    log("geng() 1st call returns: " + geng());
+    log("geng() 2nd call returns: " + geng());
+    log("geng() 3rd call returns: " + geng());
+    log("genh() 1st call returns: " + genh());
+    log("genh() 2nd call returns: " + genh());
+    
+    divider();
+    
+    //Make a function fibonaccif that returns a generator that will return
+    //the next fibonacci number
+    //var fib = fibonaccif(0, 1);
+    //fib() -> 0
+    //fib() -> 1
+    //fib() -> 1
+    //fib() -> 2
+    //fib() -> 3
+    //fib() -> 5
+    function fibonaccif(first, second) {
+        return function () {
+          var next = first;
+          first = second;
+          second += next;
+          return next;
+        };
+    }
+    var fib = fibonaccif(0, 1);
+    log("fib() 1st: " + fib());
+    log("fib() 2nd: " + fib());
+    log("fib() 3rd: " + fib());
+    log("fib() 4th: " + fib());
+    log("fib() 5th: " + fib());
+    log("fib() 6th: " + fib());
+
+    divider();
+    
+    //write a counter function that returns an object containing two functions that implement
+    //an up/down counter.  Hiding the counter.
+    //var object = counter(10);
+    //var next = object.next;
+    //var prev = object.prev;
+    //next() -> 11
+    //prev() -> 10
+    //prev() -> 9
+    //next() -> 10
+    function counter(value) {
+        return {
+            next: function () {
+                value += 1;
+                return value;
+            },
+            prev: function () {
+                value -= 1;
+                return value;
+            }
+        };
+    }
+    var object = counter(10),
+        next = object.next,
+        prev = object.prev;
+    log("Counter Object");    
+    log(next());
+    log(prev());
+    log(prev());
+    log(prev());
+    
+    divider();
+    
+    //make a revokable function that takes a unary function and returns an object
+    //containing an invoke function that can invoke the unary function
+    //and revoke function that disable the invoke function
+    //var rev = revocable(identity),
+    //    invoke = rev.invoke;
+    //invoke(7); -> 7
+    //rev.revoke();
+    //invoke(8); -> undefined
+    function revocable(unary) {
+        return {
+          invoke: function(arg) {
+              if (unary !== undefined) {
+                  return unary(arg);
+              }
+          }, 
+          revoke: function () {
+              unary = undefined;
+          }
+        };
+    }
+    var rev = revocable(identity),
+        invoke = rev.invoke;
+    log("Able to invoke. Returns: " + invoke(7));
+    log("Able to invoke again. Returns: " + invoke(9));
+    rev.revoke();
+    log("After calling revoke: " + invoke(8));
+    log("After calling revoke: " + invoke(8));
+    
+    divider();
+    
+    //Write a function M that takes a value and an optional source string and returns them in an object
+    //JSON.stringify(m(1))
+    function m(value, source) {
+        return {
+            value: value,
+            source: typeof source === 'string'
+                ? source
+                : String(value)
+        };
+    }
+    log("m");
+    log("JSON Stringify m(3) returns: " + JSON.stringify(m(3)));
+    
+    divider();
+    
+    //write a function addm that takes two m objects and returns an m object
+    //JSON.stringify(addm(m(3), m(4))
+    //{"value":7, "source": "(3+4)"
+    function addm(m1, m2) {
+        return m(
+            m1.value + m2.value,
+            "(" + m1.source + "+" + m2.source + ")"
+        );
+    }
+    JSON.stringify(addm(m(3), m(4)));
+    log("addm")
+    log(JSON.stringify(addm(m(3), m(4))));
+    
+    divider();
+    
+    //Write a function liftm that takes binary function and a string that 
+    //acts on m objects
+    //var addm = liftm(add, "+");
+    //JSON.stringify(addm(m(3), m(4)))
+    //{"value":7, "source": "(3+4)"
+    function liftm(binary, operator) {
+        return function(m1, m2) {
+            return m(
+                binary(m1.value, m2.value),
+                "(" + m1.source + operator + m2.source + ")"
+            );
+        };
+    }
+    var addm2 = liftm(add, "+");
+    var subm = liftm(sub, "-");
+    var mulm = liftm(mul, "*");
+    log("liftm")
+    log("Using addition binary " + JSON.stringify(addm2(m(3), m(4))));
+    log("Using subtract binary " + JSON.stringify(subm(m(3), m(4))));
+    log("Using multiply binary " + JSON.stringify(mulm(m(3), m(4))));
+    
+    divider();
+    
+    //Modify function liftm so that the functions it produces can accept arguments that 
+    //are either numbers or m objects
+    //var addm = liftm(add, "+")
+    //JSON.stringify(addm(3, 4))
+    //{"value":7, "source": "(3+4)"
+    function liftm2(binary, operator) {
+        return function(m1, m2) {
+            if (typeof m1 === "number") {
+                m1 = m(m1);
+            }
+            if (typeof m2 === "number") {
+                m2 = m(m2);
+            }
+            return m(
+                binary(m1.value, m2.value),
+                "(" + m1.source + operator + m2.source + ")"
+            );
+        }; 
+    }
+    var addm3 = liftm2(add, "+");
+    log("liftm2");
+    log("liftm2 with number inputs: " + JSON.stringify(addm3(3, 4)));
+    
+    //Write a function addg that adds from many invocations until it sees an empty invocation
+    //addg -> undefined
+    //addg(2)() -> 2
+    //addg(2)(7)() -> 9
+    //addg(3)(0)(4)() -> 7
+    
+    
+</script></pre></body></html>
