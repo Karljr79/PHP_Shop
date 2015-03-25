@@ -70,6 +70,7 @@
             };
         };
     }
+    log("liftf");
     log("lift f function returns: " + liftf(mul)(3)(4));
     
     divider();
@@ -82,6 +83,7 @@
         };
     }
     var add3 = curry(add, 3);
+    log("curry");
     log("curry function returns: " + add3(4));
     log("curry(mul, 5)(6) returns: " + curry(mul, 5)(6));
     
@@ -92,6 +94,7 @@
     var inc = curry(add, 1);
     var inc2 = addf(1);
     var inc3 = liftf(add)(1);
+    log("inc");
     log("1st inc function, using curry(add, 1): " + inc(5));
     log("2nd inc function, using addf(1): " + inc2(5));
     log("3rd inc function, using liftf(add)(1): " + inc3(5));
@@ -542,11 +545,84 @@
     log("liftm2");
     log("liftm2 with number inputs: " + JSON.stringify(addm3(3, 4)));
     
+    divider();
+    
     //Write a function addg that adds from many invocations until it sees an empty invocation
     //addg -> undefined
     //addg(2)() -> 2
     //addg(2)(7)() -> 9
     //addg(3)(0)(4)() -> 7
+    function addg(first) {
+        function more(next) {
+            if (next === undefined) {
+                return first;
+            }
+            first += next;
+            return more;
+        }
+        if (first !== undefined) {
+            return more;
+        }
+    }
+    log("addg");
+    log("addg using 3 recursions: " + addg(2)(2)(3)());
+    log("addg using 5 recursions: " + addg(2)(2)(3)(100)(16)());
+    log("addg using 0 recusrions: " + addg());
+    
+    divider();
+    
+    //write a function liftg that will take a binary function and apply it to many invocations
+    //liftg(mul)() -> undefined
+    //liftg(mul)(3)() -> 3
+    //liftg(mul)(3)(0)(4)() -> 0
+    //liftg(mul)(1)(2)(4)(8) -> 64
+    function liftg(binary, first) {
+        return function (first) {
+            if (first === undefined) {
+                return first;
+            }
+            return function more(next) {
+                if (next === undefined) {
+                    return first;
+                }
+                first = binary(first, next);
+                return more;
+            };
+        };
+    }
+    log("liftg");
+    log(liftg(mul)());
+    log(liftg(mul)(3)());
+    log(liftg(mul)(3)(0)(4)());
+    log(liftg(mul)(1)(2)(4)(8)());
+
+    divider();
+    
+    //Make a function continuize that takes a unary function, and returns a function that 
+    //takes a callback and an arguement
+    //sqrtc = continuize(Math.sqrt);
+    //sqrtc(alert, 81) -> 9
+    function continuize(unary) {
+        return function result(callback, arg) {
+                return callback(unary(arg));
+        };
+    }
+    var sqrtc = continuize(Math.sqrt);
+    (sqrtc(log, 81));
+    
+    divider();
+    
+    // Recommended way of creating objects in ES5
+    // function constructor(init) {
+    //     var that = other_constructor(init),
+    //     member,
+    //     method = function () {
+    //         //init, member, method
+    //     };
+    //     that.method = method;
+    //     return that;
+    // }
+    
     
     
 </script></pre></body></html>
